@@ -6,3 +6,4 @@ broadcast/
 # Node-related if used in scripts
 node_modules/
 lib/
+deployments/

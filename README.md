@@ -83,6 +83,58 @@ Recipient
 - Use the Recipient tab to scan announcements by `viewTag` and your `pView`
 - Or go to Shielded Pool tab and Sweep by entering `pView` and `mainAddress` to consolidate notes to your main account (off‑chain in this demo)
 
+## Protocol Overview (zk‑ENS with Stealth + Pool)
+
+Goal
+- Decouple a public ENS identity from spend activity by deriving unlinkable, one‑time stealth addresses for each payment, then aggregating those funds in a privacy pool before sweeping to a main account.
+
+High‑Level Flow
+```
+┌──────────┐        1) Resolve ENS        ┌──────────────────────┐
+│  Sender  │ ───────────────────────────► │  Backend (Resolver)  │
+└──────────┘                              └──────────────────────┘
+      │                                            │
+      │ 2) Derive (pSpend, pView, R) → stealth     │
+      ├──────────────────────────────────────────► │
+      │◄────────────────────── 3) Announcement (R, viewTag, stealth)
+      │
+      │ 4) Send funds → stealth
+      │ 5) Deposit note → Shielded Pool (commitment)
+      ▼                                            │
+┌──────────────────────┐                           │
+│   Shielded Pool      │ ◄─────────────────────────┘
+│  (notes + nullifiers)│
+└──────────────────────┘
+      ▲
+      │ 6) Recipient scans announcements via viewTag
+┌────────────┐  7) Prove ownership (demo)  ┌──────────────────────┐
+│ Recipient  │ ───────────────────────────► │  Backend (Proof API) │
+└────────────┘                              └──────────────────────┘
+      │
+      │ 8) Sweep: discover owned notes by pView, mark spent,
+      │    and transfer aggregate to main account (unlinkable)
+      └────────────────────────────────────────────────────────► Main Account
+```
+
+Low‑Level Mechanics (demo)
+- Meta‑address: backend simulates an ENS record with `{ pSpend, pView }` (random hex in this demo).
+- Ephemeral key: sender samples `R` (random in demo) and derives:
+  - `aStealth = H(pSpend, pView, R)`; `stealth = 0x[aStealth[0..20bytes]]`
+  - `viewTag = H(pView, R)[0..1byte]` for quick recipient filtering
+- Announcement: stored in memory with `{ensName, metaAddress, stealth, R, viewTag}`.
+- Pool deposit: commitment = `H(stealth, value, secret)` where `secret = H(pView, R)`; a nullifier `H(secret, stealth)` is precomputed for spending later. Notes live in an in‑memory list.
+- Discovery: recipient recomputes `H(pView, R)[0..1byte]` and filters announcements by `viewTag`; ownership proof is simulated.
+- Sweep: for a given `pView`, the backend finds all unspent notes tied to stealth addresses announced with that `pView`, marks them spent, and returns a single transfer to the provided main address.
+
+Privacy Properties (intended)
+- One‑time stealth addresses unlink payments to the ENS identity.
+- Aggregation through a pool breaks the link between individual stealth addresses and the final main account.
+- View tags let recipients efficiently discover relevant announcements without revealing keys.
+
+Out‑of‑Scope/In Demo Form
+- Real key derivation, real Poseidon2, Merkle trees, and SNARK proofs are simulated to keep the demo small and readable.
+- ENS integration is mocked; a production system would use ENS resolver records or an ERC‑6538 registry for meta‑addresses and emit announcements per ERC‑5564.
+
 ## Noir Circuits
 
 The `circuits` package now uses Noir (Nargo) with two programs. They are not wired to the app by default and serve as a starting point.
@@ -108,11 +160,11 @@ Workspace
 pnpm test
 ```
 
-Backend (Jest)
+Backend (Vitest)
 ```bash
 pnpm -F zk-ens-backend test
 ```
-- Tests cover meta‑address resolve, stealth derivation (aligned `aStealth` + `viewTag`), announcement filtering by `(pView, R)`, and shielded pool deposit/sweep flows.
+- Covers: resolve, derive, announcements filter, pool deposit/state, sweep flows.
 
 Frontend (Vitest)
 ```bash
@@ -186,15 +238,16 @@ Services:
 Deployment output:
 - After startup, find deployed addresses in `contracts/deployments/local.json`.
 
-Alternative split mode
-- You can run Anvil and deployment as separate services using Compose profiles:
+ 
 
-```
-docker compose --profile split up --build -d anvil contracts-deploy
-```
+## End-to-End (API only)
 
-- This will expose Anvil at `http://localhost:8545` and run a one‑shot deployment in `contracts-deploy`. Then start the rest:
+The `e2e/` package runs a front‑to‑back flow against the backend only (no browser): resolve → derive → announcements → deposit → pool state → sweep.
 
-```
-docker compose --profile split up --build -d backend frontend
-```
+- One‑shot runner (brings up chain + backend, waits, runs test, tears down):
+  - `pnpm -F zk-ens-e2e e2e`
+- Manual control:
+  - `pnpm -F zk-ens-e2e up`
+  - `pnpm -F zk-ens-e2e wait`
+  - `vitest run` inside `e2e/`
+  - `pnpm -F zk-ens-e2e down`

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.24;
 
-import {Test, console2} from "forge-std/Test.sol";
+import {Test} from "forge-std/Test.sol";
 import {ShieldedPool} from "../src/ShieldedPool.sol";
 import {VerifierMock} from "../src/VerifierMock.sol";
 
@@ -68,4 +68,3 @@ contract ShieldedPoolTest is Test {
         pool.withdraw(nullifier, bob, 1, relayer, 2, proof, inputs);
     }
 }
-

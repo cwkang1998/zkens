@@ -2,4 +2,4 @@ packages:
   - backend
   - frontend
   - circuits
-
+  - e2e

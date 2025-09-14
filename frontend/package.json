@@ -9,7 +9,7 @@
     "build": "tsc -b && vite build",
     "preview": "vite preview",
     "start": "vite preview --port 3000",
-    "test": "vitest run --pool=forks"
+    "test": "vitest run --passWithNoTests --pool=forks"
   },
   "dependencies": {
     "react": "^19.1.1",

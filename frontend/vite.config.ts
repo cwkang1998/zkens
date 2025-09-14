@@ -7,7 +7,8 @@ export default defineConfig({
     port: 3030,
     proxy: {
       '/api': {
-        target: 'http://localhost:3001',
+        // Allow overriding the backend URL via env for Docker Compose
+        target: process.env.VITE_API_URL || 'http://localhost:3001',
         changeOrigin: true
       }
     }
@@ -18,4 +19,3 @@ export default defineConfig({
     }
   }
 });
-
