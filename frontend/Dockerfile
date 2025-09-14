@@ -4,7 +4,7 @@ FROM node:22-alpine
 WORKDIR /app
 
 COPY package.json package-lock.json* pnpm-lock.yaml* ./
-RUN if [ -f pnpm-lock.yaml ]; then npm -g i pnpm@9 && pnpm install --frozen-lockfile; \
+RUN if [ -f pnpm-lock.yaml ]; then npm -g i pnpm@10 && pnpm install --frozen-lockfile; \
     else npm install; fi
 
 COPY . .
