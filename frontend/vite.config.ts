@@ -5,6 +5,10 @@ import path from 'path';
 export default defineConfig({
   server: {
     port: 3030,
+    fs: {
+      // Allow importing deployment/ABI JSON from sibling contracts dir
+      allow: [path.resolve(__dirname, '..'), path.resolve(__dirname, '../contracts')]
+    },
     proxy: {
       '/api': {
         // Allow overriding the backend URL via env for Docker Compose

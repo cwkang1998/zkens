@@ -1,1 +1,1 @@
-{"root":["./src/app.tsx","./src/main.tsx","./src/setuptests.ts","./src/components/pool.tsx","./src/components/recipient.tsx","./src/components/sender.tsx"],"version":"5.9.2"}
+{"root":["./src/app.tsx","./src/config.ts","./src/main.tsx","./src/setuptests.ts","./src/web3.ts","./src/abis/ensregistry.ts","./src/abis/publicresolver.ts","./src/components/events.tsx","./src/components/pool.tsx","./src/components/recipient.tsx","./src/components/sender.tsx","./src/components/setup.tsx","./src/components/wallet.tsx"],"version":"5.9.2"}

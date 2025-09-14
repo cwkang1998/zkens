@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { Events } from './Events';
 
 type Announcement = {
   id: number;
@@ -197,6 +198,9 @@ export function Recipient() {
           </div>
         )}
       </div>
+
+      {/* Live onchain events: deposits signal announcements materialized onchain; withdrawals show sweeps */}
+      <Events />
     </div>
   );
 }

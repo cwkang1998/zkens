@@ -13,7 +13,8 @@
   },
   "dependencies": {
     "react": "^19.1.1",
-    "react-dom": "^19.1.1"
+    "react-dom": "^19.1.1",
+    "viem": "^2.21.29"
   },
   "devDependencies": {
     "@testing-library/dom": "^10.0.0",
