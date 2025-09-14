@@ -5,7 +5,9 @@
   "description": "Demo frontend for zk-ENS using React + Vite (TypeScript)",
   "type": "module",
   "scripts": {
+    "predev": "node scripts/sync-artifacts.mjs",
     "dev": "vite",
+    "prebuild": "node scripts/sync-artifacts.mjs",
     "build": "tsc -b && vite build",
     "preview": "vite preview",
     "start": "vite preview --port 3000",

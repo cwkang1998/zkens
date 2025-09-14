@@ -117,7 +117,7 @@ describe('Handlers', () => {
     poolDepositHandler(dep.req, dep.res);
 
     const sw = mockReqRes({ body: { pView: meta.pView, mainAddress: '0xabc' } });
-    poolSweepHandler(sw.req, sw.res);
+    await (poolSweepHandler as any)(sw.req, sw.res);
     const sweep = (sw.res as any)._getJSON();
     expect(sweep.swept).toBeGreaterThanOrEqual(7);
     expect(Array.isArray(sweep.transfers)).toBe(true);

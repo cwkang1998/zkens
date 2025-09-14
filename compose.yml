@@ -20,10 +20,15 @@ services:
     environment:
       - PORT=3001
       - NODE_ENV=development
+      - BACKEND_RPC_URL=http://chain:8545
+      - BACKEND_DEPLOYMENTS_PATH=/app/deployments/local.json
+      - BACKEND_PRIVATE_KEY=0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
     ports:
       - "3001:3001"
     depends_on:
       - chain
+    volumes:
+      - ./contracts/deployments:/app/deployments
 
   frontend:
     build:

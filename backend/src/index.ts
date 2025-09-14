@@ -1,6 +1,7 @@
 import express from 'express';
 import bodyParser from 'body-parser';
 import crypto from 'crypto';
+import { onchainDeposit, onchainWithdraw } from './chain';
 
 /**
  * A simple in‑memory store for announcements.  In a real application you would
@@ -179,6 +180,17 @@ function poolDepositHandler(req: express.Request, res: express.Response) {
     spent: false
   };
   poolNotes.push(note);
+  // Try to mirror to onchain pool (best-effort in local dev)
+  let txHash: string | undefined;
+  (async () => {
+    try {
+      const h = await onchainDeposit(('0x' + commitment) as `0x${string}`, BigInt(value));
+      txHash = h as string | undefined;
+    } catch (e) {
+      // eslint-disable-next-line no-console
+      console.warn('onchain deposit failed (ignored):', (e as any)?.message || e);
+    }
+  })().catch(() => {});
   return res.json({
     note: {
       id: note.id,
@@ -186,7 +198,8 @@ function poolDepositHandler(req: express.Request, res: express.Response) {
       stealthAddress: note.stealthAddress,
       value: note.value,
       spent: note.spent
-    }
+    },
+    onchain: txHash ? { txHash } : undefined
   });
 }
 app.post('/api/pool/deposit', poolDepositHandler);
@@ -207,7 +220,7 @@ app.get('/api/pool/state', poolStateHandler);
  * for stealth addresses discoverable from announcements (matching addresses),
  * mark them spent, and return an aggregate transfer to mainAddress.
  */
-function poolSweepHandler(req: express.Request, res: express.Response) {
+async function poolSweepHandler(req: express.Request, res: express.Response) {
   const { pView, mainAddress } = req.body as { pView?: string; mainAddress?: string };
   if (!pView || !mainAddress) return res.status(400).json({ error: 'pView and mainAddress are required' });
 
@@ -223,13 +236,29 @@ function poolSweepHandler(req: express.Request, res: express.Response) {
   const spentNoteIds: number[] = [];
   let swept = 0;
   toSpend.forEach((n) => {
-    n.spent = true;
     swept += n.value;
     spentNoteIds.push(n.id);
   });
 
+  // Try onchain withdraw for the aggregated amount
+  let txHash: string | undefined;
+  if (swept > 0) {
+    try {
+      const h = await onchainWithdraw(BigInt(swept), mainAddress as `0x${string}`);
+      txHash = h as string | undefined;
+    } catch (e) {
+      // eslint-disable-next-line no-console
+      console.warn('onchain withdraw failed (ignored):', (e as any)?.message || e);
+    }
+  }
+
+  // Mark notes spent after attempting onchain withdraw
+  toSpend.forEach((n) => {
+    n.spent = true;
+  });
+
   const transfers = swept > 0 ? [{ to: mainAddress, value: swept }] : [];
-  return res.json({ swept, transfers, spentNoteIds });
+  return res.json({ swept, transfers, spentNoteIds, onchain: txHash ? { txHash } : undefined });
 }
 app.post('/api/pool/sweep', poolSweepHandler);
 

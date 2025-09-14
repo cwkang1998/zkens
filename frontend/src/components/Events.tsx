@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import ShieldedPoolJson from '../../../contracts/out/ShieldedPool.sol/ShieldedPool.json' assert { type: 'json' };
-import localDeployments from '../../../contracts/deployments/local.json' assert { type: 'json' };
+import ShieldedPoolJson from '@/abi/ShieldedPool.json';
+import localDeployments from '@/deployments/local.json';
 import { getPublicClient } from '../web3';
 import { pickNetwork, poolAddress as poolAddressFromEnv } from '../config';
 
