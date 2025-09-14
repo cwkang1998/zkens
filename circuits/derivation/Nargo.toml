@@ -1,0 +1,8 @@
+[package]
+name = "derivation"
+type = "bin"
+version = "0.1.0"
+
+[dependencies]
+std = { tag = "v0.26.0", git = "https://github.com/noir-lang/noir" }
+common = { path = "../common" }

@@ -1,0 +1,17 @@
+{
+  "name": "circuits",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Noir circuits for zk-ENS demo",
+  "scripts": {
+    "compile": "cd derivation && nargo compile && cd ../ownership && nargo compile",
+    "compile:derivation": "cd derivation && nargo compile",
+    "compile:ownership": "cd ownership && nargo compile",
+    "prove:derivation": "cd derivation && nargo prove",
+    "prove:ownership": "cd ownership && nargo prove",
+    "verify:derivation": "cd derivation && nargo verify",
+    "verify:ownership": "cd ownership && nargo verify",
+    "clean": "rm -rf derivation/target ownership/target common/target",
+    "test": "cd derivation && nargo test && cd ../ownership && nargo test"
+  }
+}

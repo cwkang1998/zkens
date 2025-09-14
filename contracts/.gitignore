@@ -1,0 +1,8 @@
+# Foundry build artifacts
+out/
+cache/
+broadcast/
+
+# Node-related if used in scripts
+node_modules/
+lib/

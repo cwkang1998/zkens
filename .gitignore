@@ -1,0 +1,17 @@
+# Npm
+node_modules/
+AGENTS.md
+
+# Builds
+.vite
+.bin
+dist/
+
+
+# Mac
+.DS_STORE
+
+# Foundry (contracts)
+contracts/out/
+contracts/cache/
+contracts/broadcast/
